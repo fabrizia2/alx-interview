@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-"""Module implements pascal triangle"""
+"""Module that implements pascal triangle"""
 
 
 def pascal_triangle(n):
-    if n <= 0:
+    if not isinstance(n, int) or n <= 0:
         return []
     triangle = [[1]]
     for i in range(1, n):
