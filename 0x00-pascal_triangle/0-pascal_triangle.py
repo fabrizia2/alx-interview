@@ -4,6 +4,7 @@
 
 
 def pascal_triangle(n):
+    """Pascal triangle"""
     if not isinstance(n, int) or n <= 0:
         return []
     triangle = [[1]]
