@@ -1,47 +1,50 @@
 #!/usr/bin/python3
 
-"""Script that reads stdin line by line and computes metrics"""
+"""reads stdin line by line and computes metrics"""
 
 import sys
+import re
 
 
-def print_status(code_dict, total_size):
-    """Prints the computed metrics"""
-    print("Total file size: {:d}".format(total_size))
-    for code in sorted(code_dict.keys()):
-        if code_dict[code] != 0:
-            print("{}: {:d}".format(code, code_dict[code]))
+def main():
+    """print statistics"""
+    current_dict = {str(num):
+                    0 for num in [200, 301, 400, 401, 403, 404, 405, 500]}
+    file_size = 0
+    count = 0
 
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            break
 
-status_codes = {"200": 0, "301": 0, "400": 0,
-                "401": 0, "403": 0, "404": 0, "405": 0, "500": 0}
+        st = r'\[(.*?)\] "GET \/projects\/260 HTTP\/1\.1" (\d{3}) (\d+)$'
+        pattern = r'^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - ' + st
 
-count = 0
-total_size = 0
+        match = re.match(pattern, line)
+        if not match:
+            continue
 
-try:
-    for line in sys.stdin:
-        if count != 0 and count % 10 == 0:
-            print_status(status_codes, total_size)
+        status_code = str(match.group(3))
 
-        line_parts = line.split()
-        count += 1
+        if status_code in current_dict:
+            count += 1
+            current_dict[status_code] += 1
+            file_size += int(match.group(4))
 
         try:
-            file_size = int(line_parts[-1])
-            total_size += file_size
-        except Exception:
-            pass
+            if count == 10:
+                print("File size: {}".format(file_size))
+                sorted_dict = sorted(current_dict.items(), key=lambda x: x)
+                for key, value in sorted_dict:
+                    print("{}: {}".format(key, value))
+                count = 0
+        except KeyboardInterrupt as e:
+            sorted_dict = sorted(current_dict.items(), key=lambda x: x)
+            for key, value in sorted_dict:
+                print("{}: {}".format(key, value))
+            print(e)
 
-        try:
-            status_code = line_parts[-2]
-            if status_code in status_codes:
-                status_codes[status_code] += 1
-        except Exception:
-            pass
 
-    print_status(status_codes, total_size)
-
-except KeyboardInterrupt:
-    print_status(status_codes, total_size)
-    raise
+if __name__ == "__main__":
+    main()
