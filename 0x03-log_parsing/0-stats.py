@@ -7,9 +7,11 @@ import re
 
 
 def main():
-    """print statistics"""
-    current_dict = {str(num):
-                    0 for num in [200, 301, 400, 401, 403, 404, 405, 500]}
+    """reads stdin line by line and computes metrics"""
+    current_dict = {}
+    for num in [200, 301, 400, 401, 403, 404, 405, 500]:
+        current_dict[str(num)] = 0
+
     file_size = 0
     count = 0
 
@@ -35,12 +37,14 @@ def main():
         try:
             if count == 10:
                 print("File size: {}".format(file_size))
-                sorted_dict = sorted(current_dict.items(), key=lambda x: x)
+                sorted_dict = sorted(current_dict.items(),
+                                     key=lambda x: x)
                 for key, value in sorted_dict:
                     print("{}: {}".format(key, value))
                 count = 0
         except KeyboardInterrupt as e:
-            sorted_dict = sorted(current_dict.items(), key=lambda x: x)
+            sorted_dict = sorted(current_dict.items(),
+                                 key=lambda x: x)
             for key, value in sorted_dict:
                 print("{}: {}".format(key, value))
             print(e)
