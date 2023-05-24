@@ -6,57 +6,53 @@ import sys
 
 def is_safe(board, row, col, N):
     """Check if the current position is attacked by any other queen
-    in the previous rows"""
+    # in the previous rows"""
     for i in range(row):
-        if board[i][col] == 'Q':
+        if board[i] == col:
             return False
-
-    # Check upper diagonal on the left side
-    i, j = row - 1, col - 1
-    while i >= 0 and j >= 0:
-        if board[i][j] == 'Q':
+        if board[i] + i == row + col:
             return False
-        i -= 1
-        j -= 1
-
-    # Check upper diagonal on the right side
-    i, j = row - 1, col + 1
-    while i >= 0 and j < N:
-        if board[i][j] == 'Q':
+        if board[i] - i == col - row:
             return False
-        i -= 1
-        j += 1
-
     return True
 
 
 def solve_nqueens(N):
     """Create an empty board"""
-    board = [['.' for _ in range(N)] for _ in range(N)]
+    board = [-1] * N
+    solutions = []
 
     def backtrack(row):
-        """Base case: If all queens are placed, print the solution"""
+        """Base case: If all queens are placed, add the solution"""
         if row == N:
-            print_solution(board)
+            solutions.append(board[:])
             return
 
         # Try placing the queen in each column of the current row
         for col in range(N):
             if is_safe(board, row, col, N):
                 # Place the queen
-                board[row][col] = 'Q'
+                board[row] = col
                 # Recur for the next row
                 backtrack(row + 1)
                 # Remove the queen (backtrack)
-                board[row][col] = '.'
-
-    def print_solution(board):
-        """Print the board configuration"""
-        for row in board:
-            print(' '.join(row))
-        print()
+                board[row] = -1
 
     backtrack(0)
+
+    # Print the solutions
+    for solution in solutions:
+        print_solution(solution)
+
+
+def print_solution(board):
+    """Print the board configuration"""
+    print('[', end='')
+    for i in range(len(board)):
+        print('[{}, {}]'.format(i, board[i]), end='')
+        if i < len(board) - 1:
+            print(', ', end='')
+    print(']')
 
 
 if __name__ == '__main__':
