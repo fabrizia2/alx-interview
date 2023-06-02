@@ -2,52 +2,38 @@
 
 const request = require('request');
 
+function getMovieCharacters(movieId) {
+  const url = `https://swapi.dev/api/films/${movieId}/`;
+  
+  request(url, (error, response, body) => {
+    if (error) {
+      console.log(`Error: ${error}`);
+    } else if (response.statusCode === 200) {
+      const movieData = JSON.parse(body);
+      const characterUrls = movieData.characters;
+
+      characterUrls.forEach((characterUrl) => {
+        request(characterUrl, (error, response, body) => {
+          if (error) {
+            console.log(`Error: ${error}`);
+          } else if (response.statusCode === 200) {
+            const characterData = JSON.parse(body);
+            const characterName = characterData.name;
+            console.log(characterName);
+          } else {
+            console.log(`Failed to retrieve character data for URL: ${characterUrl}`);
+          }
+        });
+      });
+    } else {
+      console.log(`Failed to retrieve movie data for ID: ${movieId}`);
+    }
+  });
+}
+
 const movieId = process.argv[2];
-const filmEndPoint = 'https://swapi-api.hbtn.io/api/films/' + movieId;
-let people = [];
-const names = [];
-
-const requestCharacters = async () => {
-  await new Promise(resolve => request(filmEndPoint, (err, res, body) => {
-    if (err || res.statusCode !== 200) {
-      console.error('Error: ', err, '| StatusCode: ', res.statusCode);
-    } else {
-      const jsonBody = JSON.parse(body);
-      people = jsonBody.characters;
-      resolve();
-    }
-  }));
-};
-
-const requestNames = async () => {
-  if (people.length > 0) {
-    for (const p of people) {
-      await new Promise(resolve => request(p, (err, res, body) => {
-        if (err || res.statusCode !== 200) {
-          console.error('Error: ', err, '| StatusCode: ', res.statusCode);
-        } else {
-          const jsonBody = JSON.parse(body);
-          names.push(jsonBody.name);
-          resolve();
-        }
-      }));
-    }
-  } else {
-    console.error('Error: Got no Characters for some reason');
-  }
-};
-
-const getCharNames = async () => {
-  await requestCharacters();
-  await requestNames();
-
-  for (const n of names) {
-    if (n === names[names.length - 1]) {
-      process.stdout.write(n);
-    } else {
-      process.stdout.write(n + '\n');
-    }
-  }
-};
-
-getCharNames();
+if (!movieId) {
+  console.log('Please provide a movie ID as a command-line argument.');
+} else {
+  getMovieCharacters(movieId);
+}
